@@ -65,28 +65,40 @@ export default function ProfileView({ username }: { username: string }) {
   }, [username]);
 
   useEffect(() => {
-    if (user === "loading" || !user || tab !== "followers") return;
+    if (user === "loading") return;
+    if (!user) return;
+    if (tab !== "followers") return;
+    const u: Profile = user;
     setFollowers(null);
-    getFollowers(user.uid).then(setFollowers);
+    getFollowers(u.uid).then(setFollowers);
   }, [tab, user?.uid]);
 
   useEffect(() => {
-    if (user === "loading" || !user || tab !== "following") return;
+    if (user === "loading") return;
+    if (!user) return;
+    if (tab !== "following") return;
+    const u: Profile = user;
     setFollowing(null);
-    getFollowing(user.uid).then(setFollowing);
+    getFollowing(u.uid).then(setFollowing);
   }, [tab, user?.uid]);
 
   useEffect(() => {
-    if (user === "loading" || !user || tab !== "likes") return;
+    if (user === "loading") return;
+    if (!user) return;
+    if (tab !== "likes") return;
+    const u: Profile = user;
     setLikes(null);
-    getStarredRepos(user.uid).then(setLikes);
+    getStarredRepos(u.uid).then(setLikes);
   }, [tab, user?.uid]);
 
   const onFollow = async () => {
-    if (!me || user === "loading" || !user) return router.push("/login");
-    const now = await toggleFollow(me, user.uid);
+    if (!me) return router.push("/login");
+    if (user === "loading") return;
+    if (!user) return;
+    const u: Profile = user;
+    const now = await toggleFollow(me, u.uid);
     setFollowerCount((c) => c + (now ? 1 : -1));
-    toast(now ? `Kamu mengikuti @${user.username}` : `Berhenti mengikuti @${user.username}`, now ? "success" : "info");
+    toast(now ? `Kamu mengikuti @${u.username}` : `Berhenti mengikuti @${u.username}`, now ? "success" : "info");
   };
 
   if (user === "loading") {
