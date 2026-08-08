@@ -16,8 +16,8 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { createRepo, repoSlugAvailable } from "@/lib/db";
-import { slugify, readmeOf } from "@/lib/format";
+import { createRepo, repoSlugAvailable, slugify } from "@/lib/db";
+import { readmeOf } from "@/lib/format";
 import { useToast } from "@/components/Toast";
 import Link from "next/link";
 
