@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { Wrench, CheckCircle2, XCircle } from "lucide-react";
-import { getSettings, type AppSettings } from "@/lib/db";
+import { getSettings } from "@/lib/db";
+import type { AppSettings } from "@/lib/types";
 
 export default function MaintenancePage() {
   const [s, setS] = useState<AppSettings | null | "loading">("loading");

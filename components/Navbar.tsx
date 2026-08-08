@@ -7,7 +7,8 @@ import { motion } from "framer-motion";
 import { Terminal, Search, Menu, X, Plus, User, LogOut, ShieldCheck, Wrench } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Avatar } from "@/components/Avatar";
-import { getSettings, type AppSettings } from "@/lib/db";
+import { getSettings } from "@/lib/db";
+import type { AppSettings } from "@/lib/types";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 

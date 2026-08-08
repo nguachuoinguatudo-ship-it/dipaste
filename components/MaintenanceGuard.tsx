@@ -3,7 +3,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { Wrench } from "lucide-react";
-import { getSettings, type AppSettings } from "@/lib/db";
+import { getSettings } from "@/lib/db";
+import type { AppSettings } from "@/lib/types";
 import Link from "next/link";
 
 export function MaintenanceGuard({ children }: { children: ReactNode }) {

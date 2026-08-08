@@ -8,7 +8,8 @@ import type { Repo } from "@/lib/types";
 import { RepoCard } from "@/components/RepoCard";
 import { Avatar } from "@/components/Avatar";
 import Link from "next/link";
-import { getUserByUsername, type Profile } from "@/lib/db";
+import { getUserByUsername } from "@/lib/db";
+import type { Profile } from "@/lib/types";
 
 function SearchInner() {
   const params = useSearchParams();
