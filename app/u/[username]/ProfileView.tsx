@@ -40,8 +40,9 @@ export default function ProfileView({ username }: { username: string }) {
   const [likes, setLikes] = useState<Repo[] | null>(null);
   const [followerCount, setFollowerCount] = useState(0);
 
-  const isMe = me?.username === user?.username || me?.uid === user?.uid;
-  const isFollowing = me?.following?.includes(user?.uid || "") || false;
+  const isMe =
+    user !== "loading" && user !== null && (me?.username === user.username || me?.uid === user.uid);
+  const isFollowing = me?.following?.includes(user !== "loading" && user !== null ? user.uid : "") || false;
 
   useEffect(() => {
     let alive = true;
@@ -64,25 +65,25 @@ export default function ProfileView({ username }: { username: string }) {
   }, [username]);
 
   useEffect(() => {
-    if (!user || tab !== "followers") return;
+    if (user === "loading" || !user || tab !== "followers") return;
     setFollowers(null);
     getFollowers(user.uid).then(setFollowers);
   }, [tab, user?.uid]);
 
   useEffect(() => {
-    if (!user || tab !== "following") return;
+    if (user === "loading" || !user || tab !== "following") return;
     setFollowing(null);
     getFollowing(user.uid).then(setFollowing);
   }, [tab, user?.uid]);
 
   useEffect(() => {
-    if (!user || tab !== "likes") return;
+    if (user === "loading" || !user || tab !== "likes") return;
     setLikes(null);
     getStarredRepos(user.uid).then(setLikes);
   }, [tab, user?.uid]);
 
   const onFollow = async () => {
-    if (!me || !user) return router.push("/login");
+    if (!me || user === "loading" || !user) return router.push("/login");
     const now = await toggleFollow(me, user.uid);
     setFollowerCount((c) => c + (now ? 1 : -1));
     toast(now ? `Kamu mengikuti @${user.username}` : `Berhenti mengikuti @${user.username}`, now ? "success" : "info");
