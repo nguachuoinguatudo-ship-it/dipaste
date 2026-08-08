@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
-import type { Repo, RepoFile, Profile } from "@/lib/types";
+import type { Repo, RepoFile, Profile, AppSettings } from "@/lib/types";
 import { readmeOf } from "@/lib/format";
 
 export function slugify(s: string): string {
