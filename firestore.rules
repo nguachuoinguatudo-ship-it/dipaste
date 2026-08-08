@@ -14,6 +14,16 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    function userDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    // ===== ANTI-SPAM: cegah posting beruntun =====
+    function antiSpamCooldown() {
+      var last = userDoc().data.lastRepoAt;
+      return last == null || last < request.time - duration.value(30, 's');
+    }
+
     // ===== USERS =====
     match /users/{uid} {
       allow read: if true;
@@ -25,7 +35,9 @@ service cloud.firestore {
     // ===== REPOS =====
     match /repos/{slug} {
       allow read: if true;
-      allow create: if isSignedIn();
+      allow create: if isSignedIn()
+        && request.resource.data.uid == request.auth.uid
+        && antiSpamCooldown();
       allow update: if isOwner(resource.data.uid) || isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'stars']);
       allow delete: if isOwner(resource.data.uid) || isAdmin();
     }

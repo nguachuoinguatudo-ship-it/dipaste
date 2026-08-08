@@ -145,14 +145,16 @@ export default function CreatePage() {
       router.push(`/${slug}`);
     } catch (err: any) {
       console.error(err);
-      toast(
-        err?.code?.includes("quota")
-          ? "Storage penuh. Hubungi admin."
-          : err?.code?.includes("unavailable")
-            ? "Koneksi bermasalah. Coba lagi."
-            : "Gagal membuat repository. Coba lagi.",
-        "error"
-      );
+      const msg = err?.message?.includes("anti-spam")
+        ? "Anti-spam: tunggu 30 detik sebelum post lagi."
+        : err?.code?.includes("permission-denied")
+          ? "Ditolak: posting terlalu cepat atau akun belum lengkap."
+          : err?.code?.includes("quota")
+            ? "Storage penuh. Hubungi admin."
+            : err?.code?.includes("unavailable")
+              ? "Koneksi bermasalah. Coba lagi."
+              : "Gagal membuat repository. Coba lagi.";
+      toast(msg, "error");
     } finally {
       setBusy(false);
     }

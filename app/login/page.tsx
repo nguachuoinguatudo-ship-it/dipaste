@@ -25,6 +25,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
+  const [hpValue, setHpValue] = useState("");
   const [busy, setBusy] = useState(false);
   const [step, setStep] = useState<"auth" | "profile">("auth");
   const [tempUser, setTempUser] = useState<any>(null);
@@ -36,6 +37,10 @@ export default function LoginPage() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (hpValue) {
+      toast("Terjadi kesalahan. Coba lagi.", "error");
+      return;
+    }
     setBusy(true);
     try {
       if (mode === "register") {
@@ -134,6 +139,15 @@ export default function LoginPage() {
               </div>
 
               <form onSubmit={submit} className="flex flex-col gap-4">
+                <input
+                  type="text"
+                  value={hpValue}
+                  onChange={(e) => setHpValue(e.target.value)}
+                  className="hidden"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                />
                 <div className="relative">
                   <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
                   <input

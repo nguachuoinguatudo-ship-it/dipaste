@@ -16,6 +16,7 @@ import {
   arrayUnion,
   arrayRemove,
   onSnapshot,
+  serverTimestamp,
   writeBatch,
   getCountFromServer,
 } from "firebase/firestore";
@@ -201,6 +202,14 @@ export async function createRepo(
       order: i,
     });
   });
+
+  try {
+    await updateDoc(doc(db, "users", owner.uid), { lastRepoAt: serverTimestamp() });
+  } catch (e: any) {
+    if (e?.code === "permission-denied") {
+      throw new Error("Tunggu 30 detik dulu sebelum post lagi — anti-spam!");
+    }
+  }
 
   await batch.commit();
   data.onProgress?.(100);
