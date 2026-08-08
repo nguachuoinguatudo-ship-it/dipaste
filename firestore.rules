@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ===== USERS =====
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ===== REPOS =====
+    match /repos/{slug} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.uid) || isAdmin() || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'stars']);
+      allow delete: if isOwner(resource.data.uid) || isAdmin();
+    }
+
+    match /repos/{slug}/files/{fileId} {
+      allow read: if true;
+      allow create, update, delete: if isOwner(get(/databases/$(database)/documents/repos/$(slug)).data.uid) || isAdmin();
+    }
+
+    // ===== SETTINGS (maintenance mode, announcement) =====
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ===== ADMINS =====
+    match /admins/{uid} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+  }
+}
