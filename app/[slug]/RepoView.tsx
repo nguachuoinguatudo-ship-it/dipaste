@@ -140,10 +140,10 @@ export default function RepoView({ slug }: { slug: string }) {
   };
 
   const onDelete = async () => {
-    if (!repo || !isOwner) return;
+    if (!repo || repo === "loading" || !isOwner) return;
     setDeleting(true);
     try {
-      await deleteRepo(repo.slug, files);
+      await deleteRepo(slug, files);
       toast("Repository dihapus.");
       router.push("/");
     } catch {
