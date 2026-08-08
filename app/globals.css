@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #07070f;
+  --color-surface: #0e0e1a;
+  --color-card: #14141f;
+  --color-raised: #1b1b2b;
+  --color-line: #26263d;
+  --color-muted: #8b8ba3;
+  --color-faint: #5a5a72;
+  --color-primary: #8b5cf6;
+  --color-primary2: #6366f1;
+  --color-pink: #ec4899;
+  --color-cyan2: #22d3ee;
+  --color-green2: #34d399;
+  --color-yellow2: #fbbf24;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-bg);
+  color: #e6e6f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(139, 92, 246, 0.4);
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: #2a2a44;
+  border-radius: 999px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: #3b3b5e;
+}
+
+.glass {
+  background: rgba(20, 20, 35, 0.6);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.gradient-text {
+  background: linear-gradient(100deg, #a78bfa 0%, #818cf8 40%, #f472b6 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-text-warm {
+  background: linear-gradient(100deg, #fbbf24, #f472b6, #a78bfa);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 select-none whitespace-nowrap;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn-primary {
+  background: linear-gradient(120deg, #7c3aed, #6366f1);
+  @apply text-white shadow-lg shadow-violet-600/25;
+}
+.btn-primary:hover {
+  filter: brightness(1.12);
+}
+.btn-ghost {
+  @apply border border-line text-muted bg-transparent;
+}
+.btn-ghost:hover {
+  @apply border-[#3d3d63] text-white bg-raised;
+}
+.btn-danger {
+  @apply text-rose-300 border border-rose-500/40 bg-rose-500/10;
+}
+.btn-danger:hover {
+  @apply bg-rose-500/25 border-rose-500/70;
+}
+.btn-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+.btn-md {
+  @apply px-4 py-2.5 text-sm;
+}
+.btn-lg {
+  @apply px-6 py-3 text-base;
+}
+
+.input {
+  @apply w-full rounded-xl border border-line bg-raised px-4 py-3 text-sm text-white placeholder:text-faint outline-none transition-all duration-200;
+}
+.input:focus {
+  @apply border-primary/70 ring-2 ring-primary/20;
+}
+
+.card {
+  @apply rounded-2xl border border-line bg-card;
+}
+
+.chip {
+  @apply inline-flex items-center gap-1 rounded-full border border-line bg-raised px-3 py-1 text-xs font-medium text-muted;
+}
+
+.tag {
+  @apply inline-flex items-center rounded-lg bg-violet-500/10 border border-violet-500/25 px-2 py-0.5 text-xs font-medium text-violet-300;
+}
+
+.divider {
+  @apply h-px w-full bg-line;
+}
+
+.skeleton {
+  @apply animate-pulse rounded-xl bg-raised;
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 25px) scale(0.95); }
+}
+.animate-blob {
+  animation: blob 9s ease-in-out infinite;
+}
+.animate-blob2 {
+  animation: blob 12s ease-in-out infinite reverse;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fadeUp 0.5s ease both;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.toast-in {
+  animation: toastIn 0.25s ease both;
+}
+
+/* ===== markdown (README) ===== */
+.md {
+  @apply text-[15px] leading-relaxed text-[#d6d6e4];
+  overflow-wrap: anywhere;
+}
+.md h1, .md h2, .md h3, .md h4 {
+  @apply font-bold text-white mt-6 mb-3;
+}
+.md h1 { @apply text-2xl; }
+.md h2 { @apply text-xl border-b border-line pb-2; }
+.md h3 { @apply text-lg; }
+.md h4 { @apply text-base; }
+.md p { @apply my-3; }
+.md a { @apply text-violet-400 underline decoration-violet-400/40 hover:text-violet-300; }
+.md ul { @apply list-disc pl-6 my-3 space-y-1; }
+.md ol { @apply list-decimal pl-6 my-3 space-y-1; }
+.md blockquote {
+  @apply border-l-4 border-violet-500/60 bg-raised/60 rounded-r-xl px-4 py-2 my-4 text-muted;
+}
+.md code {
+  @apply font-mono text-[13px] bg-raised border border-line rounded-md px-1.5 py-0.5 text-cyan-300;
+}
+.md pre {
+  @apply my-4 rounded-xl overflow-x-auto border border-line bg-[#0b0b14];
+}
+.md pre code {
+  @apply block bg-transparent border-0 p-4 text-[13px] leading-relaxed text-[#d6d6e4];
+}
+.md table {
+  @apply w-full my-4 text-sm border-collapse overflow-hidden rounded-xl;
+}
+.md th {
+  @apply bg-raised text-white font-semibold text-left px-3 py-2 border border-line;
+}
+.md td {
+  @apply px-3 py-2 border border-line;
+}
+.md img {
+  @apply rounded-xl max-w-full my-4 border border-line;
+}
+.md hr { @apply border-line my-6; }
+.md .language-json code, .md .language-javascript code, .md .language-js code,
+.md .language-typescript code, .md .language-ts code, .md .language-python code,
+.md .language-py code, .md .language-html code, .md .language-css code,
+.md .language-bash code, .md .language-sh code, .md .language-go code,
+.md .language-rust code, .md .language-java code, .md .language-c code,
+.md .language-cpp code, .md .language-sql code, .md .language-php code,
+.md .language-kotlin code, .md .language-swift code, .md .language-ruby code {
+  @apply text-inherit;
+}
+
+/* ===== code viewer line numbers ===== */
+.code-lines {
+  counter-reset: line;
+}
+.code-lines .line-num::before {
+  counter-increment: line;
+  content: counter(line);
+  @apply inline-block w-10 text-right pr-4 text-faint select-none;
+}
+.code-lines .line {
+  display: block;
+  min-height: 1.55em;
+  padding: 0 1rem 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.code-lines .line:hover {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.tabbar-scroll::-webkit-scrollbar {
+  height: 4px;
+}
