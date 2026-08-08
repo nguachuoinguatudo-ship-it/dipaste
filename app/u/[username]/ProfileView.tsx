@@ -71,7 +71,7 @@ export default function ProfileView({ username }: { username: string }) {
     const u: Profile = user;
     setFollowers(null);
     getFollowers(u.uid).then(setFollowers);
-  }, [tab, user?.uid]);
+  }, [tab, user]);
 
   useEffect(() => {
     if (user === "loading") return;
@@ -80,7 +80,7 @@ export default function ProfileView({ username }: { username: string }) {
     const u: Profile = user;
     setFollowing(null);
     getFollowing(u.uid).then(setFollowing);
-  }, [tab, user?.uid]);
+  }, [tab, user]);
 
   useEffect(() => {
     if (user === "loading") return;
@@ -89,7 +89,7 @@ export default function ProfileView({ username }: { username: string }) {
     const u: Profile = user;
     setLikes(null);
     getStarredRepos(u.uid).then(setLikes);
-  }, [tab, user?.uid]);
+  }, [tab, user]);
 
   const onFollow = async () => {
     if (!me) return router.push("/login");
