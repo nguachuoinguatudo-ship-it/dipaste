@@ -17,6 +17,7 @@ import { useAuth } from "@/lib/auth";
 import { updateProfile, uploadAvatar, usernameAvailable, getUserRepos, getStarredRepos } from "@/lib/db";
 import { useToast } from "@/components/Toast";
 import { Avatar } from "@/components/Avatar";
+import { CompleteProfile } from "@/components/CompleteProfile";
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import type { Repo } from "@/lib/types";
@@ -59,6 +60,10 @@ export default function MePage() {
     );
   }
 
+  if (!profile) {
+    return <CompleteProfile />;
+  }
+
   const onPickAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
@@ -76,7 +81,7 @@ export default function MePage() {
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!profile) return;
+    if (!profile) return toast("Profil belum termuat. Muat ulang halaman.", "error");
     setSaving(true);
     try {
       const uname = username.trim().toLowerCase();

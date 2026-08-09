@@ -20,6 +20,7 @@ import { useAuth } from "@/lib/auth";
 import { createRepo, repoSlugAvailable, slugify } from "@/lib/db";
 import { readmeOf } from "@/lib/format";
 import { useToast } from "@/components/Toast";
+import { CompleteProfile } from "@/components/CompleteProfile";
 import Link from "next/link";
 
 interface LocalFile {
@@ -61,7 +62,7 @@ export default function CreatePage() {
     );
   }
 
-  if (profile === null) return null;
+  if (profile === null) return <CompleteProfile />;
 
   const addFiles = useCallback((list: FileList | File[]) => {
     const arr = Array.from(list);
