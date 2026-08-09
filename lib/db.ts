@@ -20,8 +20,8 @@ import {
   writeBatch,
   getCountFromServer,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
-import { db, storage } from "@/lib/firebase";
+import { getIdToken } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
 import type { Repo, RepoFile, Profile, AppSettings } from "@/lib/types";
 import { readmeOf } from "@/lib/format";
 
@@ -82,11 +82,29 @@ export async function getUserByUsername(username: string): Promise<Profile | nul
   return snap.docs[0].data() as Profile;
 }
 
+async function uploadToBlob(kind: "avatar" | "repo", folder: string, file: File): Promise<string> {
+  const user = auth.currentUser;
+  if (!user) throw new Error("Belum login");
+  const token = await getIdToken(user);
+  const form = new FormData();
+  form.append("kind", kind);
+  form.append("folder", folder);
+  form.append("file", file);
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => null);
+    throw new Error(err?.error || "Upload gagal");
+  }
+  const data = await res.json();
+  return data.url;
+}
+
 export async function uploadAvatar(uid: string, file: File): Promise<string> {
-  const ext = file.name.split(".").pop() || "png";
-  const ref0 = ref(storage, `avatars/${uid}/avatar.${ext}`);
-  await uploadBytes(ref0, file, { contentType: file.type });
-  return getDownloadURL(ref0);
+  return uploadToBlob("avatar", uid, file);
 }
 
 export async function getUserStats(uid: string): Promise<{ repos: number }> {
@@ -165,10 +183,11 @@ export async function createRepo(
 ): Promise<string> {
   const slug = data.slug || (await uniqueSlug(data.title));
 
+  const urls: string[] = [];
   for (let i = 0; i < data.files.length; i++) {
     const f = data.files[i];
-    const r = ref(storage, `repos/${slug}/${f.name}`);
-    await uploadBytes(r, f.file, { contentType: f.type });
+    const url = await uploadToBlob("repo", slug, f.file);
+    urls.push(url);
     data.onProgress?.(Math.round(((i + 1) / data.files.length) * 60));
   }
 
@@ -195,7 +214,7 @@ export async function createRepo(
     const fileRef = doc(collection(repoRef, "files"));
     batch.set(fileRef, {
       name: f.name,
-      path: `repos/${slug}/${f.name}`,
+      url: urls[i],
       size: f.size,
       type: f.type,
       isReadme: f.isReadme || readmeOf(f.name),
@@ -298,21 +317,28 @@ export async function getUserRepos(uid: string, how: "createdAt" | "stars" = "cr
 }
 
 export async function deleteRepo(slug: string, files: RepoFile[]) {
+  const user = auth.currentUser;
+  const token = user ? await getIdToken(user).catch(() => null) : null;
   const batch = writeBatch(db);
   for (const f of files) {
     batch.delete(doc(collection(doc(db, "repos", slug), "files"), f.id));
-    try {
-      await deleteObject(ref(storage, f.path));
-    } catch {
-      /* already gone */
+    if (f.url && token) {
+      try {
+        await fetch("/api/delete", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ url: f.url }),
+        });
+      } catch {
+        /* already gone */
+      }
     }
   }
   batch.delete(doc(db, "repos", slug));
   await batch.commit();
 }
 
-export async function readFileContent(path: string): Promise<string> {
-  const url = await getDownloadURL(ref(storage, path));
+export async function readFileContent(url: string): Promise<string> {
   const res = await fetch(url);
   return res.text();
 }

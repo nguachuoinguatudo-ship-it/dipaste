@@ -32,7 +32,7 @@ export interface Repo {
 export interface RepoFile {
   id: string;
   name: string;
-  path: string;
+  url: string;
   size: number;
   type: string;
   isReadme: boolean;

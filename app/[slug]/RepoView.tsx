@@ -105,7 +105,7 @@ export default function RepoView({ slug }: { slug: string }) {
     let alive = true;
     setCodeLoading(true);
     setCode("");
-    readFileContent(target.path)
+    readFileContent(target.url)
       .then((c) => alive && setCode(c))
       .catch(() => alive && setCode("// Gagal memuat file. Mungkin sudah dihapus."))
       .finally(() => alive && setCodeLoading(false));
