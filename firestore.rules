@@ -20,8 +20,8 @@ service cloud.firestore {
 
     // ===== ANTI-SPAM: cegah posting beruntun =====
     function antiSpamCooldown() {
-      var last = userDoc().data.lastRepoAt;
-      return last == null || last < request.time - duration.value(30, 's');
+      return userDoc().data.lastRepoAt == null
+        || userDoc().data.lastRepoAt < request.time - duration.value(30, 's');
     }
 
     // ===== USERS =====
