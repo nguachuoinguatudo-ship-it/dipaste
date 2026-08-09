@@ -14,6 +14,7 @@ import {
   BookMarked,
   Sparkles,
   AlertTriangle,
+  ClipboardPaste,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { createRepo, repoSlugAvailable, slugify } from "@/lib/db";
@@ -41,6 +42,10 @@ export default function CreatePage() {
   const [customSlug, setCustomSlug] = useState("");
   const [files, setFiles] = useState<LocalFile[]>([]);
   const [dragOver, setDragOver] = useState(false);
+  const [pasteMode, setPasteMode] = useState(false);
+  const [pasteName, setPasteName] = useState("main.js");
+  const [pasteLang, setPasteLang] = useState("javascript");
+  const [pasteCode, setPasteCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(0);
   const [slugTaken, setSlugTaken] = useState<boolean | null>(null);
@@ -89,6 +94,46 @@ export default function CreatePage() {
 
   const toggleReadme = (id: string) => {
     setFiles((p) => p.map((f) => (f.id === id ? { ...f, isReadme: !f.isReadme } : f)));
+  };
+
+  const LANG_EXTS: Record<string, string> = {
+    javascript: "main.js",
+    typescript: "main.ts",
+    python: "main.py",
+    html: "index.html",
+    css: "style.css",
+    markdown: "README.md",
+    json: "data.json",
+    sql: "query.sql",
+    bash: "script.sh",
+    java: "Main.java",
+    cpp: "main.cpp",
+    c: "main.c",
+    go: "main.go",
+    rust: "main.rs",
+    php: "index.php",
+    ruby: "main.rb",
+    yaml: "config.yaml",
+    text: "note.txt",
+  };
+
+  const onLangChange = (lang: string) => {
+    setPasteLang(lang);
+    if (!pasteName || Object.values(LANG_EXTS).includes(pasteName)) {
+      setPasteName(LANG_EXTS[lang]);
+    }
+  };
+
+  const addPaste = () => {
+    const code = pasteCode;
+    if (!code.trim()) return toast("Kode masih kosong.", "error");
+    const name = pasteName.trim() || LANG_EXTS[pasteLang];
+    const safeName = name.replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 100) || "paste.txt";
+    const f = new File([code], safeName, { type: "text/plain" });
+    addFiles([f]);
+    setPasteCode("");
+    setPasteName(LANG_EXTS[pasteLang]);
+    setPasteMode(false);
   };
 
   const addTag = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -171,7 +216,7 @@ export default function CreatePage() {
         </span>
         <div>
           <h1 className="text-2xl font-extrabold">Buat Repository</h1>
-          <p className="text-sm text-muted">Upload file, tambahkan README, dan bagikan link-nya.</p>
+          <p className="text-sm text-muted">Upload file atau tempel kode langsung, tambahkan README, lalu bagikan link-nya.</p>
         </div>
       </div>
 
@@ -255,6 +300,77 @@ export default function CreatePage() {
             )}
           </div>
 
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPasteMode(false)}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                !pasteMode
+                  ? "border-violet-500/60 bg-violet-500/15 text-white"
+                  : "border-line bg-raised/40 text-faint hover:border-violet-500/40 hover:text-white"
+              }`}
+            >
+              <UploadCloud size={16} /> Upload File
+            </button>
+            <button
+              type="button"
+              onClick={() => setPasteMode(true)}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-all ${
+                pasteMode
+                  ? "border-violet-500/60 bg-violet-500/15 text-white"
+                  : "border-line bg-raised/40 text-faint hover:border-violet-500/40 hover:text-white"
+              }`}
+            >
+              <ClipboardPaste size={16} /> Tempel Kode
+            </button>
+          </div>
+
+          {pasteMode ? (
+            <div className="mt-4 flex flex-col gap-3">
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <input
+                    value={pasteName}
+                    onChange={(e) => setPasteName(e.target.value)}
+                    placeholder="Nama file — mis. main.js"
+                    maxLength={100}
+                    className={input + " font-mono text-xs"}
+                  />
+                </div>
+                <select
+                  value={pasteLang}
+                  onChange={(e) => onLangChange(e.target.value)}
+                  className={input + " w-40 cursor-pointer font-mono text-xs"}
+                >
+                  {Object.keys(LANG_EXTS).map((l) => (
+                    <option key={l} value={l} className="bg-[#0d0d16]">
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                value={pasteCode}
+                onChange={(e) => setPasteCode(e.target.value)}
+                placeholder="Tempel kode kamu di sini..."
+                rows={8}
+                spellCheck={false}
+                className={input + " resize-none font-mono text-xs leading-relaxed"}
+              />
+              <div className="flex items-center justify-between">
+                <p className="text-xs text-faint">
+                  Ukuran teks: {(new Blob([pasteCode]).size / 1024).toFixed(1)} KB
+                </p>
+                <button
+                  type="button"
+                  onClick={addPaste}
+                  className="btn btn-primary btn-md"
+                >
+                  <Plus size={15} /> Tambah ke Repository
+                </button>
+              </div>
+            </div>
+          ) : (
           <div
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -277,6 +393,7 @@ export default function CreatePage() {
               onChange={(e) => { addFiles(e.target.files || []); e.target.value = ""; }}
             />
           </div>
+          )}
 
           {files.length > 0 && (
             <ul className="mt-4 flex flex-col gap-2">

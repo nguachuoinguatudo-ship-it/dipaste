@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
 import { del } from "@vercel/blob";
-import { getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-
-function admin() {
-  if (getApps().length) return getApps()[0];
-  return initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  });
-}
+import { verifyIdToken } from "@/lib/verify-token";
 
 export async function POST(req: Request) {
   try {
@@ -16,7 +8,7 @@ export async function POST(req: Request) {
     if (!token) {
       return NextResponse.json({ error: "Belum login" }, { status: 401 });
     }
-    await getAuth(admin()).verifyIdToken(token);
+    await verifyIdToken(token);
 
     const { url } = await req.json();
     if (typeof url !== "string" || !url.includes(".public.blob.vercel-storage.com")) {

@@ -10,7 +10,6 @@
   "dependencies": {
     "@vercel/blob": "^2.7.0",
     "firebase": "^11.3.1",
-    "firebase-admin": "^14.2.0",
     "framer-motion": "^12.6.2",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.477.0",

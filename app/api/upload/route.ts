@@ -1,14 +1,6 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
-import { getApps, initializeApp } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
-
-function admin() {
-  if (getApps().length) return getApps()[0];
-  return initializeApp({
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  });
-}
+import { verifyIdToken } from "@/lib/verify-token";
 
 function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9._-]/g, "-").replace(/^-+|-+$/g, "").slice(0, 100);
@@ -20,7 +12,7 @@ export async function POST(req: Request) {
     if (!token) {
       return NextResponse.json({ error: "Belum login" }, { status: 401 });
     }
-    const decoded = await getAuth(admin()).verifyIdToken(token);
+    const decoded = await verifyIdToken(token);
     const uid = decoded.uid;
 
     const form = await req.formData();
