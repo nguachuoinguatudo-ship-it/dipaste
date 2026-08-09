@@ -245,6 +245,10 @@ export async function getRepoFiles(slug: string): Promise<RepoFile[]> {
   return snap.docs.map((d) => ({ ...(d.data() as RepoFile), id: d.id }));
 }
 
+export async function renameRepoFile(slug: string, fileId: string, name: string) {
+  await updateDoc(doc(db, "repos", slug, "files", fileId), { name });
+}
+
 export function registerView(slug: string) {
   try {
     if (sessionStorage.getItem(`viewed:${slug}`)) return;

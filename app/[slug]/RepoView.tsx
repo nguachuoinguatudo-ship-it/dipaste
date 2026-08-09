@@ -12,6 +12,8 @@ import {
   Clock,
   Copy,
   Check,
+  X,
+  Pencil,
   Trash2,
   UserPlus,
   UserCheck,
@@ -29,10 +31,11 @@ import {
   toggleStarRepo,
   toggleFollow,
   deleteRepo,
+  renameRepoFile,
   readFileContent,
   getUserByUsername,
 } from "@/lib/db";
-import { langFromName, timeAgo, formatCount, formatDate } from "@/lib/format";
+import { langFromName, timeAgo, formatCount, formatDate, readmeOf } from "@/lib/format";
 import type { Repo, RepoFile, Profile } from "@/lib/types";
 import { CodeViewer, ReadmeView } from "@/components/CodeViewer";
 import { Avatar } from "@/components/Avatar";
@@ -53,6 +56,8 @@ export default function RepoView({ slug }: { slug: string }) {
   const [starred, setStarred] = useState(false);
   const [confirmDel, setConfirmDel] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   const isOwner = me?.uid === (repo as Repo | null)?.uid;
   const isFollowing = me?.following?.includes(owner?.uid || "") || false;
@@ -139,6 +144,22 @@ export default function RepoView({ slug }: { slug: string }) {
     const now = await toggleFollow(me, owner.uid);
     toast(now ? `Kamu mengikuti @${owner.username}` : `Berhenti mengikuti @${owner.username}`, now ? "success" : "info");
     setOwner({ ...owner, followers: (owner.followers || 0) + (now ? 1 : -1) });
+  };
+
+  const saveRename = async (f: RepoFile) => {
+    const name = renameValue.trim().replace(/[^a-zA-Z0-9._-]+/g, "-").slice(0, 100);
+    setRenamingId(null);
+    if (!name) return toast("Nama tidak boleh kosong.", "error");
+    if (name === f.name) return;
+    const dup = files.some((x) => x.id !== f.id && x.name === name);
+    if (dup) return toast("Nama file sudah dipakai.", "error");
+    try {
+      await renameRepoFile(slug, f.id, name);
+      setFiles((p) => p.map((x) => (x.id === f.id ? { ...x, name, isReadme: x.isReadme || readmeOf(name) } : x)));
+      toast("Nama file diperbarui.");
+    } catch {
+      toast("Gagal memperbarui nama.", "error");
+    }
   };
 
   const onDelete = async () => {
@@ -247,17 +268,50 @@ export default function RepoView({ slug }: { slug: string }) {
           </div>
           <ul className="max-h-[60vh] overflow-y-auto p-2">
             {files.map((f) => (
-              <li key={f.id}>
-                <button
-                  onClick={() => setActive(f.id)}
-                  className={`flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all ${
-                    active === f.id ? "bg-gradient-to-r from-violet-600/25 to-indigo-600/15 border border-violet-500/30 text-white" : "text-muted hover:bg-raised hover:text-white"
-                  }`}
-                >
-                  {f.isReadme ? <BookMarked size={16} className="shrink-0 text-emerald-400" /> : <FileCode2 size={16} className="shrink-0 text-violet-300/80" />}
-                  <span className="min-w-0 flex-1 truncate font-mono text-[13px]">{f.name}</span>
-                  <span className="shrink-0 text-[10px] text-faint">{(f.size / 1024).toFixed(1)}K</span>
-                </button>
+              <li key={f.id} className="group flex items-center gap-1">
+                {renamingId === f.id ? (
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); saveRename(f); }}
+                    className="flex w-full items-center gap-1.5 rounded-xl border border-violet-500/50 bg-raised px-2.5 py-2"
+                  >
+                    <input
+                      autoFocus
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Escape") setRenamingId(null); }}
+                      maxLength={100}
+                      className="w-full min-w-0 flex-1 bg-transparent font-mono text-[13px] text-white outline-none"
+                    />
+                    <button type="submit" className="shrink-0 rounded-md p-1 text-emerald-400 hover:bg-emerald-500/10" title="Simpan">
+                      <Check size={15} />
+                    </button>
+                    <button type="button" onClick={() => setRenamingId(null)} className="shrink-0 rounded-md p-1 text-faint hover:bg-rose-500/10 hover:text-rose-400" title="Batal">
+                      <X size={15} />
+                    </button>
+                  </form>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => setActive(f.id)}
+                      className={`flex w-full min-w-0 flex-1 items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-all ${
+                        active === f.id ? "bg-gradient-to-r from-violet-600/25 to-indigo-600/15 border border-violet-500/30 text-white" : "text-muted hover:bg-raised hover:text-white"
+                      }`}
+                    >
+                      {f.isReadme ? <BookMarked size={16} className="shrink-0 text-emerald-400" /> : <FileCode2 size={16} className="shrink-0 text-violet-300/80" />}
+                      <span className="min-w-0 flex-1 truncate font-mono text-[13px]">{f.name}</span>
+                      <span className="shrink-0 text-[10px] text-faint">{(f.size / 1024).toFixed(1)}K</span>
+                    </button>
+                    {isOwner && (
+                      <button
+                        onClick={() => { setRenamingId(f.id); setRenameValue(f.name); }}
+                        title="Ubah nama file"
+                        className="shrink-0 rounded-lg p-2 text-faint opacity-0 transition-all hover:bg-violet-500/15 hover:text-violet-300 group-hover:opacity-100"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                    )}
+                  </>
+                )}
               </li>
             ))}
             {files.length === 0 && (
