@@ -40,7 +40,7 @@ import { useToast } from "@/components/Toast";
 
 export default function RepoView({ slug }: { slug: string }) {
   const router = useRouter();
-  const { authUser, profile: me } = useAuth();
+  const { authUser, profile: me, loading } = useAuth();
   const { toast } = useToast();
 
   const [repo, setRepo] = useState<Repo | null | "loading">("loading");
@@ -126,14 +126,16 @@ export default function RepoView({ slug }: { slug: string }) {
   };
 
   const onStar = async () => {
-    if (!me || !authUser) return router.push("/login");
+    if (!authUser) return router.push("/login");
+    if (!me) return toast("Profil belum siap, coba lagi.", "info");
     const now = await toggleStarRepo(me, repo as Repo);
     setStarred(now);
     toast(now ? "Berhasil di-like! ❤️" : "Like dihapus.", now ? "success" : "info");
   };
 
   const onFollow = async () => {
-    if (!me || !owner) return router.push("/login");
+    if (!authUser) return router.push("/login");
+    if (!me || !owner) return toast("Profil belum siap, coba lagi.", "info");
     const now = await toggleFollow(me, owner.uid);
     toast(now ? `Kamu mengikuti @${owner.username}` : `Berhenti mengikuti @${owner.username}`, now ? "success" : "info");
     setOwner({ ...owner, followers: (owner.followers || 0) + (now ? 1 : -1) });

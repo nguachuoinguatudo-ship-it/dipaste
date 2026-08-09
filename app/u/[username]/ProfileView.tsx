@@ -92,7 +92,8 @@ export default function ProfileView({ username }: { username: string }) {
   }, [tab, user]);
 
   const onFollow = async () => {
-    if (!me) return router.push("/login");
+    if (!authUser) return router.push("/login");
+    if (!me) return toast("Profil belum siap, coba lagi.", "info");
     if (user === "loading") return;
     if (!user) return;
     const u: Profile = user;
